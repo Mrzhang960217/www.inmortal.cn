@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="zh-CN" xml:lang="zh-CN">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta charset="UTF-8" />
+    <title>我的订单-小米商城</title>
+    <meta name="viewport" content="width=1226" />
+    <link rel="shortcut icon" href="//s01.mifile.cn/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="//s01.mifile.cn/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="//s01.mifile.cn/css/base.min.css?v2016d53" />
+    <link rel="stylesheet" href="//s01.mifile.cn/css/user/main.min.css?f9ddf2" />
+    <script src="__STATIC__/assets/js/jquery-1.11.3.js"></script>
+    <script type="text/javascript">
+    var _head_over_time = (new Date()).getTime();
+    </script>
+    <script type="text/javascript">
+        function msg($oid)
+        {
+            $("#div_"+$oid).css('display', 'block');
+
+        }
+
+        function sub($oid)
+        {
+            $msg = $("#txt_"+$oid).val();
+
+            $.post('__SITE__/index/Index/massage', {msg: $msg, oid: $oid}, function(data) {
+                if (data.status) {
+                    alert(data.msg);
+                    location.href = '__SITE__/index/Index/yetSend';
+                } else{
+                    alert(data.msg);
+                }
+            }, 'json');
+        }
+    </script>
+</head>
+
+<body>
+    
+    {include file="header/header"}
+
+    {if (empty($session.userId))}
+        <meta http-equiv="Refresh" content="0; url=__SITE__/login" />
+    {else/}
+
+        <div class="breadcrumbs">
+        <div class="container">
+            <a href="__SITE__">首页</a><span class="sep">&gt;</span><span>交易订单</span>
+        </div>
+    </div>
+    <div class="page-main user-main">
+        <div class="container">
+            <div class="row">
+                <div class="span4">
+                    <div class="uc-box uc-sub-box">
+                        <div class="uc-nav-box">
+                            <div class="box-hd">
+                                <h3 class="title">订单中心</h3>
+                            </div>
+                            <div class="box-bd">
+                                <ul class="uc-nav-list J_navList">
+                                    <li><a class="J_noRandom" href="__SITE__/index/Index/order">我的订单</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="uc-nav-box">
+                            <div class="box-hd">
+                                <h3 class="title">个人中心</h3>
+                            </div>
+                            <div class="box-bd">
+                                <ul id="J_orderNavList" class="uc-nav-list">
+                                    <li><a href="__SITE__/index/Index/portal">我的个人中心</a></li>
+                                    <li><a href="__SITE__/index/Index/userInfo">个人信息</a></li>
+                                    <li><a href="__SITE__/index/Index/home">收货地址</a></li>
+                                    <li><a href="__SITE__/index/Index/dopass">修改密码</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="uc-nav-box">
+                            <div class="box-hd">
+                                <h3 class="title">售后服务</h3>
+                            </div>
+                            <div class="box-bd">
+                                <ul class="uc-nav-list">
+                                    <li><a href="http://service.order.mi.com/record/list">服务记录</a></li>
+                                    <li><a href="http://service.order.mi.com/apply/front">申请服务</a></li>
+                                    <li><a href="http://service.order.mi.com/user/compensate">领取快递报销</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="span16">
+                    <div class="uc-box uc-main-box">
+                        <div class="uc-content-box order-list-box">
+                            <div class="box-hd">
+                                <h1 class="title">我的订单<small>请谨防钓鱼链接或诈骗电话，<a href="//www.mi.com/service/buy/antifraud/" target="_blank" data-stat-id="78d07fef654ba47a" onclick="_msq.push(['trackEvent', '5eab40056fa03ac0-78d07fef654ba47a', '//www.mi.com/service/buy/antifraud/', 'pcpid']);">了解更多&gt;</a></small></h1>
+                                <div class="more clearfix">
+                                    <ul class="filter-list J_orderType">
+                                        <li class=""><a id="J_allTab" href="__SITE__/index/Index/order");">全部订单</a></li>
+                                        <li class=""><a id="J_unpaidTab" href="__SITE__/index/Index/notSend">待发货</a></li>
+                                        <li class=""><a id="J_sendTab" href="__SITE__/index/Index/hasSend">待收货</a></li>
+                                        <li class=""><a id="J_sendTab" href="__SITE__/index/Index/yetSend">已收货</a></li>
+                                    </ul>
+                                    <form id="J_orderSearchForm" class="search-form clearfix" action="__SITE__/index/Index/search" method="get">
+                                        <label for="search" class="hide">站内搜索</label>
+                                        <input class="search-text" type="search" id="J_orderSearchKeywords" name="keywords" autocomplete="off" placeholder="输入商品名称、商品编号、订单号">
+                                        <input type="submit" class="search-btn iconfont" value="">
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="box-bd">
+                                <div id="J_orderList">
+                                    <ul class="order-list">
+
+                                        {foreach $orderInfo as $info}
+
+                                        <li class="uc-order-item uc-order-item-finish">
+                                            <div class="order-detail">
+                                                
+                                                {if ($info.back_orders == 0)}
+
+                                                <div class="order-summary">
+                                                    <div class="order-status">待发货</div>
+                                                </div>
+                                                
+                                                {/if}
+                                                {if ($info.back_orders == 1)}
+
+                                                <div class="order-summary">
+                                                    <div class="order-status">
+                                                        已发货
+                                                        <a href="__SITE__/index/Index/yet/oid/{$info.order_id}" style="color: red; font-size: 14px;">是否收货</a>
+                                                    </div>
+                                                    
+                                                </div>
+
+                                                {/if}                 
+                                                {if ($info.back_orders == 2)}
+                                                       
+                                                <div class="order-summary">
+                                                    <div class="order-status">
+                                                        已收货
+                                                        {if ($info.order_msg)}
+                                                            <a href="javascript:;" style="display: block; color: red; font-size: 14px;">已评论</a>
+                                                            {$info.order_msg}
+                                                        {else /}
+                                                            <a href="javascript:;" onclick="msg({$info.order_id});" style="display: block;color: red; font-size: 14px;">评论</a>
+                                                            <div id="div_{$info.order_id}" style="display: none;">
+                                                              <input type="text" id="txt_{$info.order_id}" placeholder="请输入您想要对小米说的悄悄话" style="font-size: 12px; width: 444px;">
+                                                              <input type="button" id="sub_{$info.order_id}" onclick="sub({$info.order_id});" value="提交" style="font-size: 14px;">
+                                                            </div>
+                                                        {/if}
+                                                    </div>
+                                                </div>
+
+
+                                                {/if}
+
+                                                <table class="order-detail-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="col-main">
+                                                                <p class="caption-info">{$info.create_time|date="y年m月d日 H:i:s",###}<span class="sep">|</span>{$info.user_name}<span class="sep">|</span>订单号：<a href="javascript:;">{$info.express_number}</a><span class="sep">|</span>在线支付</p>
+                                                            </th>
+                                                            <th class="col-sub">
+                                                                <p class="caption-price">订单金额：<span class="num">{$info.total_price}</span>元</p>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="order-items">
+                                                                <ul class="goods-list">
+                                                                    <li>
+                                                                        <div class="figure figure-thumb">
+                                                                            <a href="javascript:;"> <img src="{$info.goods_pic}" width="80" height="80" alt=""> </a>
+                                                                        </div>
+                                                                        <p class="name"> <a href="javascript:;">{$info.goods_name}</a> </p>
+                                                                        <p class="price">{$info.unit_price}元 × {$info.goods_number}</p>
+                                                                    </li>
+                                                                </ul>
+                                                            </td>
+                                                            <td class="order-actions" style="color: #757575;font-weight: bold;font-size: 16px;"> 收货地址： <a class="btn btn-small btn-line-gray" href="javascript:;" style="width: 300px;margin-top: 22px;">{$info.address}</a></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </li>
+                                        {/foreach}
+                                    </ul>
+                                </div>
+                                <div id="J_orderListPages">
+                                    <div class="xm-pagenavi"> <span class="numbers first"><span class="iconfont"></span></span> <span class="numbers current">1</span> <span class="numbers last"><span class="iconfont"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="site-footer">
+        <div class="container">
+            <div class="footer-service">
+                <ul class="list-service clearfix">
+                    <li><a rel="nofollow" href="//www.mi.com/static/fast/" target="_blank"><i class="iconfont">&#xe634;</i>预约维修服务</a></li>
+                    <li><a rel="nofollow" href="//www.mi.com/service/exchange#back" target="_blank"><i class="iconfont">&#xe635;</i>7天无理由退货</a></li>
+                    <li><a rel="nofollow" href="//www.mi.com/service/exchange#free" target="_blank"><i class="iconfont">&#xe636;</i>15天免费换货</a></li>
+                    <li><a rel="nofollow" href="//www.mi.com/service/exchange#mail" target="_blank"><i class="iconfont">&#xe638;</i>满150元包邮</a></li>
+                    <li><a rel="nofollow" href="//www.mi.com/static/maintainlocation/" target="_blank"><i class="iconfont">&#xe637;</i>520余家售后网点</a></li>
+                </ul>
+            </div>
+            <div class="footer-links clearfix">
+                <dl class="col-links col-links-first">
+                    <dt>帮助中心</dt>
+                    <dd><a rel="nofollow" href="//www.mi.com/service/account/register/" target="_blank">账户管理</a></dd>
+                    <dd><a rel="nofollow" href="//www.mi.com/service/buy/buytime/" target="_blank">购物指南</a></dd>
+                    <dd><a rel="nofollow" href="//www.mi.com/service/order/sendprogress/" target="_blank">订单操作</a></dd>
+                </dl>
+                <dl class="col-links ">
+                    <dt>服务支持</dt>
+                    <dd><a rel="nofollow" href="//www.mi.com/service/exchange" target="_blank">售后政策</a></dd>
+                    <dd><a rel="nofollow" href="http://fuwu.mi.com/" target="_blank">自助服务</a></dd>
+                    <dd><a rel="nofollow" href="http://xiazai.mi.com/" target="_blank">相关下载</a></dd>
+                </dl>
+                <dl class="col-links ">
+                    <dt>线下门店</dt>
+                    <dd><a rel="nofollow" href="//www.mi.com/c/xiaomizhijia/" target="_blank">小米之家</a></dd>
+                    <dd><a rel="nofollow" href="//www.mi.com/static/maintainlocation/" target="_blank">服务网点</a></dd>
+                    <dd><a rel="nofollow" href="//www.mi.com/static/familyLocation/" target="_blank">零售网点</a></dd>
+                </dl>
+                <dl class="col-links ">
+                    <dt>关于小米</dt>
+                    <dd><a rel="nofollow" href="//www.mi.com/about" target="_blank">了解小米</a></dd>
+                    <dd><a rel="nofollow" href="http://hr.xiaomi.com/" target="_blank">加入小米</a></dd>
+                    <dd><a rel="nofollow" href="//www.mi.com/about/contact" target="_blank">联系我们</a></dd>
+                </dl>
+                <dl class="col-links ">
+                    <dt>关注我们</dt>
+                    <dd><a rel="nofollow" href="http://weibo.com/xiaomishangcheng" target="_blank">新浪微博</a></dd>
+                    <dd><a rel="nofollow" href="http://xiaoqu.qq.com/mobile/share/index.html?url=http%3A%2F%2Fxiaoqu.qq.com%2Fmobile%2Fbarindex.html%3Fwebview%3D1%26type%3D%26source%3Dindex%26_lv%3D25741%26sid%3D%26_wv%3D5123%26_bid%3D128%26%23bid%3D10525%26from%3Dwechat" target="_blank">小米部落</a></dd>
+                    <dd><a rel="nofollow" href="#J_modalWeixin" data-toggle="modal">官方微信</a></dd>
+                </dl>
+                <dl class="col-links ">
+                    <dt>特色服务</dt>
+                    <dd><a rel="nofollow" href="//order.mi.com/queue/f2code" target="_blank">F 码通道</a></dd>
+                    <dd><a rel="nofollow" href="//www.mi.com/mimobile/" target="_blank">小米移动</a></dd>
+                    <dd><a rel="nofollow" href="//order.mi.com/misc/checkitem" target="_blank">防伪查询</a></dd>
+                </dl>
+                <div class="col-contact">
+                    <p class="phone">400-100-5678</p>
+                    <p><span class="J_serviceTime-normal" style="
+">周一至周日 8:00-18:00</span>
+                        <span class="J_serviceTime-holiday" style="display:none;">2月7日至13日服务时间 9:00-18:00</span>
+                        <br>（仅收市话费）</p>
+                    <a rel="nofollow" class="btn btn-line-primary btn-small" href="//www.mi.com/service/contact" target="_blank"><i class="iconfont">&#xe600;</i> 24小时在线客服</a> </div>
+            </div>
+        </div>
+    </div>
+    <div class="site-info">
+        <div class="container">
+            <div class="logo ir">小米官网</div>
+            <div class="info-text">
+                <p class="sites"><a rel="nofollow" href="//www.mi.com/index.html" target="_blank">小米商城</a><span class="sep">|</span><a rel="nofollow" href="http://www.miui.com/" target="_blank">MIUI</a><span class="sep">|</span><a rel="nofollow" href="http://www.miliao.com/" target="_blank">米聊</a><span class="sep">|</span><a rel="nofollow" href="http://www.duokan.com/" target="_blank">多看书城</a><span class="sep">|</span><a rel="nofollow" href="http://www.miwifi.com/" target="_blank">小米路由器</a><span class="sep">|</span><a rel="nofollow" href="http://call.mi.com/" target="_blank">视频电话</a><span class="sep">|</span><a rel="nofollow" href="http://blog.xiaomi.com/" target="_blank">小米后院</a><span class="sep">|</span><a rel="nofollow" href="http://xiaomi.tmall.com/" target="_blank">小米天猫店</a><span class="sep">|</span><a rel="nofollow" href="http://shop115048570.taobao.com" target="_blank">小米淘宝直营店</a><span class="sep">|</span><a rel="nofollow" href="http://union.mi.com/" target="_blank">小米网盟</a><span class="sep">|</span><a rel="nofollow" href="//static.mi.com/feedback/" target="_blank">问题反馈</a><span class="sep">|</span><a rel="nofollow" href="#J_modal-globalSites" data-toggle="modal">Select Region</a> </p>
+                <p>&copy;<a href="//www.mi.com/" target="_blank" title="mi.com">mi.com</a> 京ICP证110507号 <a href="http://www.miitbeian.gov.cn/" target="_blank" rel="nofollow">京ICP备10046444号</a> <a rel="nofollow" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010802020134" target="_blank">京公网安备11010802020134号 </a><a rel="nofollow" href="//c1.mifile.cn/f/i/2013/cn/jingwangwen.jpg" target="_blank" rel="nofollow">京网文[2014]0059-0009号</a>
+                    <br> 违法和不良信息举报电话：185-0130-1238，本网站所列数据，除特殊说明，所有数据均出自我司实验室测试</p>
+            </div>
+            <div class="info-links">
+                <a rel="nofollow" href="//privacy.truste.com/privacy-seal/validation?rid=4fc28a8c-6822-4980-9c4b-9fdc69b94eb8&lang=zh-cn" target="_blank"><img rel="nofollow" src="//privacy-policy.truste.com/privacy-seal/seal?rid=4fc28a8c-6822-4980-9c4b-9fdc69b94eb8" alt="TRUSTe Privacy Certification" /></a>
+                <a rel="nofollow" href="//search.szfw.org/cert/l/CX20120926001783002010" target="_blank"><img rel="nofollow" src="//s01.mifile.cn/i/v-logo-2.png" alt="诚信网站" /></a>
+                <a rel="nofollow" href="https://ss.knet.cn/verifyseal.dll?sn=e12033011010015771301369&ct=df&pa=461082" target="_blank"><img rel="nofollow" src="//s01.mifile.cn/i/v-logo-1.png" alt="可信网站" /></a>
+                <a rel="nofollow" href="http://www.315online.com.cn/member/315140007.html" target="_blank"><img rel="nofollow" src="//s01.mifile.cn/i/v-logo-3.png" alt="网上交易保障中心" /></a>
+            </div>
+        </div>
+        <div class="slogan ir">探索黑科技，小米为发烧而生</div>
+    </div>
+
+    {/if}
+
+</body>
+
+</html>

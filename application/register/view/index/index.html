@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <title>小米帐号 - 注册</title>
+		<meta name="keywords" content="网站模板,手机网站模板,手机登录页面,登录页面HTML,免费网站模板下载" />
+		<meta name="description" content="JS代码网提供高质量手机网站模板下载" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="__STATIC__/assets/css/reset.css">
+        <link rel="stylesheet" href="__STATIC__/assets/css/supersized.css">
+        <link rel="stylesheet" href="__STATIC__/assets/css/style.css">
+
+        <!-- Javascript -->
+        <script src="__STATIC__/assets/js/jquery-1.11.3.js"></script>
+        <script src="__STATIC__/assets/js/supersized.3.2.7.min.js"></script>
+        <script src="__STATIC__/assets/js/supersized-init.js"></script>
+        <script src="__STATIC__/assets/js/scripts.js"></script>
+
+        <script type="text/javascript">
+            $(function() {
+
+                // 验证码刷新函数
+                function refreshVerify()
+                {
+                    var ts = Date.parse(new Date())/1000;
+                    $("#verify").attr("src", "/captcha?id="+ts);
+                }
+
+                $("#verify").click(function () {
+                    refreshVerify();
+                });
+
+                $(".username").blur(function(event) {
+                    if ($(".username").val() == '') {
+                        $(this).attr({placeholder:'手机号码不能为空'});
+                    } else {
+                        $.post("__SITE__/register/Index/doCheck", {username: $(".username").val()}, function(data) {
+                            if (data.status) {
+                                $(".username").next().html("<font color='red'>"+data.msg+"</font>");
+                            }
+                        }, 'json');
+                    }
+
+                    var reg = /\w{6,18}/;
+
+                    if (reg.test($(".username").val())) {
+                        $(".username").next().html('');
+                        return true;
+                    } else {
+                        $(".username").next().html('<font color="red">用户名必须是6~18位字符</font>');
+                        return false;
+                    }
+                });
+                $(".username").focus(function(event) {
+                    $(".username").next().html('');
+                    $(this).attr({placeholder:'请输入手机号码'});
+                });
+                $(".email").blur(function(event) {
+                    if ($(".email").val() == '') {
+                        $(this).attr({placeholder:'邮箱不能为空'});
+                    }
+                });
+                $(".email").focus(function(event) {
+                    $(this).attr({placeholder:'请输入邮箱'});
+                });
+                $(".password").blur(function(event) {
+                    if ($(".password").val() == '') {
+                        $(this).attr({placeholder:'密码不能为空'});
+                    }
+
+                        var reg = /\w{6}/;
+
+                        if (reg.test($(".password").val())) {
+                            $(".password").next().html('');
+                            return true;
+                        } else {
+                            $(".password").next().html('<font color="red">密码必须是6位的字符</font>');
+                            return false;
+                        }
+                });
+                $(".password").focus(function(event) {
+                    $(this).attr({placeholder:'请输入密码'});
+                });
+                $(".verify").blur(function(event) {
+                    if ($(".verify").val() == '') {
+                        $(this).attr({placeholder:'验证码不能为空'});
+                    }
+                });
+                $(".verify").focus(function(event) {
+                    $(this).next().html('');
+                    $(this).attr({placeholder:'请输入验证码'});
+                });
+
+                $(".submit").click(function(event) {
+                    $username = $(".username").val();
+                    $email = $(".email").val();
+                    $password = $(".password").val();
+                    $verify = $(".verify").val();
+
+                    if ($username == '' || $password == '' || $email == '' || $verify == '') {
+                        return false;
+                    }
+                  
+                    $.post('__SITE__/register/Index/doRegister', {user_phone: $username, email: $email, password: $password, verify: $verify}, function(data) {
+                        if (data.status) {
+                            $(".submit").html('注册成功，三秒后自动跳转到登录页面');
+                            $("button").attr({"disabled": true});
+                            setTimeout(function () {
+                                location.href = '__SITE__/login';
+                            }, 3000);
+                        } else {
+                            refreshVerify();
+                            $(data.classname).next().html("<font color='red'>"+data.msg+"</font>");
+                        }
+                    }, 'json');
+                });
+            });
+
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="page-container">
+            <h1>注册小米帐号</h1>
+            <!-- <form > -->
+            <form action="" onsubmit="return false;">
+                <input type="text" name="username" class="username" placeholder="请输入手机号码">
+                <span></span>
+                <input type="email" name="email" class="email" placeholder="请输入邮箱">
+                <input type="password" name="password" class="password" placeholder="请输入密码">
+                <span></span>
+                <input type="text" name="verify" class="verify" placeholder="请输入验证码">
+                <span></span>
+                <img id="verify" src="{:captcha_src()}" alt="captcha">
+                <button type="submit" class="submit">立即注册</button>
+                <div class="error"><span>+</span></div>
+            </form>
+        </div>
+
+    </body>
+
+</html>
+
+

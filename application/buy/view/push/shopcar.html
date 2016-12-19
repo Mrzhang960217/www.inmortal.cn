@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-CN" xml:lang="zh-CN">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta charset="UTF-8" />
+    <title>我的购物车-小米商城</title>
+    <meta name="viewport" content="width=1226" />
+    <link rel="shortcut icon" href="//s01.mifile.cn/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="//s01.mifile.cn/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="//s01.mifile.cn/css/base.min.css?v2016d52" />
+    <link rel="stylesheet" type="text/css" href="//s01.mifile.cn/css/cart.min.css?39656a" />
+    <script src="__STATIC__/assets/js/jquery-1.11.3.js"></script>
+    <script type="text/javascript">
+    var _head_over_time = (new Date()).getTime();
+    </script>
+    <script type="text/javascript">
+    $(function() {
+
+        $("#check i").each(function(index, el) {
+            $(this).click(function(event) {
+
+                // 点击每个对勾时对应的ID
+                $cid = $(this).attr('car_id');
+
+                // 点击对勾时改变状态
+                if ($(this).attr('class').indexOf('icon-checkbox-selected') == -1) {
+                    $(this).addClass('icon-checkbox-selected');
+                    // 当每选择一个对勾、已选择商品的数量加1
+                    $selTotalNum = parseInt($("#J_selTotalNum").text());
+                    $selTotalNum += 1;
+                    $("#J_selTotalNum").text($selTotalNum);
+
+                    // 当每选择一个对勾、合计价钱增加相应的价钱
+                    $.post('price', {
+                        cid: $cid
+                    }, function(data) {
+                        $.each(data, function(index, el) {
+                            $.each(el, function(index, el) {
+                                $goodsPrice = parseInt($("#J_cartTotalPrice").text());
+                                $goodsPrice += el.total_price;
+                                $("#J_cartTotalPrice").text($goodsPrice);
+                            });
+                        });
+                    }, 'json');
+
+                } else {
+                    $(this).removeClass('icon-checkbox-selected');
+                    // 当每取消一个对勾、已选择商品的数量减1
+                    $selTotalNum = parseInt($("#J_selTotalNum").text());
+                    $selTotalNum -= 1;
+                    $("#J_selTotalNum").text($selTotalNum);
+
+                    // 当每取消一个对勾、合计价钱减少相应的价钱
+                    $.post('price', {
+                        cid: $cid
+                    }, function(data) {
+                        $.each(data, function(index, el) {
+                            $.each(el, function(index, el) {
+                                $goodsPrice = parseInt($("#J_cartTotalPrice").text());
+                                $goodsPrice -= el.total_price;
+                                $("#J_cartTotalPrice").text($goodsPrice);
+                            });
+                        });
+                    }, 'json');
+                }
+
+            });
+        });
+    });
+    </script>
+    <script type="text/javascript">
+    // 数量减少
+    function minus($cid, $unit) {
+        $num = $("#goodsNum_" + $cid).val();
+        if ($num == 0) {
+            $("#goodsNum_" + $cid).val(0);
+            $("#goodsPrice_" + $cid).html(0);
+        } else {
+            $num--;
+            $totalPrice = $num * $unit;
+
+            $.post('plus', {
+                cid: $cid,
+                number: $num,
+                totalPrice: $totalPrice
+            }, function(data) {
+                $.each(data, function(index, el) {
+                    $.each(el, function(index, el) {
+                        $("#goodsNum_" + $cid).val(el.goods_num);
+                        $("#goodsPrice_" + $cid).html(el.total_price + '元');
+
+                        $total = parseInt($("#J_cartTotalPrice").text());
+
+                        if ($("#J_itemCheckbox_"+$cid).attr('class').indexOf('icon-checkbox-selected') == -1) {
+                        
+                        } else {
+                            $totalPrice = $total - parseInt(el.unit_price);
+                            $("#J_cartTotalPrice").html($totalPrice);
+                        }
+                        console.log($totalPrice);
+                    });
+                });
+            }, 'json');
+        }
+    }
+
+    // 数量增加
+    function plus($cid, $unit) {
+        
+        $num = $("#goodsNum_" + $cid).val();
+        $num++;
+        $totalPrice = $num * $unit;
+
+        $.post('plus', {
+            cid: $cid,
+            number: $num,
+            totalPrice: $totalPrice
+        }, function(data) {
+            $.each(data, function(index, el) {
+                $.each(el, function(index, el) {
+                    $("#goodsNum_" + $cid).val(el.goods_num);
+                    $("#goodsPrice_" + $cid).html(el.total_price + '元');
+                    $total = parseInt($("#J_cartTotalPrice").text());
+                    // console.log($("#J_itemCheckbox_"+$cid).attr('class'));
+
+                    if ($("#J_itemCheckbox_"+$cid).attr('class').indexOf('icon-checkbox-selected') == -1) {
+                        
+                    } else {
+                        $totalPrice = $total + parseInt(el.unit_price);
+                        $("#J_cartTotalPrice").html($totalPrice);
+                    }
+                });
+            });
+        }, 'json');
+    }
+
+    // 删除购物车商品
+    function delGods($cid)
+    {
+        $.post('dele', {cid: $cid}, function(data) {
+            $("#J_cartListBody_"+$cid).remove();
+            location.href = '__SITE__/buy/Push/shopcar';
+        }, 'json');
+    }
+
+    // 购物车结算
+    function account()
+    {
+        // console.log($(".icon-checkbox-selected").attr("id"));
+        $(".icon-checkbox-selected").each(function(index, el) {
+             $cid = $(this).attr('car_id');
+             // console.log($cid);
+             // console.log({$userId});
+
+            $.post('order', {uid: {$userId}, cid: $cid}, function(data) {
+
+                if (data.status) {
+                    // 支付成功后删除购物车内的商品
+                    alert(data.msg);
+                    $("#J_cartListBody_"+$cid).remove();
+                    location.href = '__SITE__/index/Index/order';
+                } else {
+                    alert(data.msg);
+                }
+            }, 'json');
+
+        });
+    }
+    </script>
+</head>
+
+<body>
+    <div class="site-header site-mini-header">
+        <div class="container">
+            <div class="header-logo">
+                <a class="logo ir" href="__SITE__" title="小米官网" data-stat-id="f4006c1551f77f22" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-f4006c1551f77f22', '__SITE__', 'pcpid']);">小米官网</a>
+            </div>
+            <div class="header-title" id="J_miniHeaderTitle">
+                <h2>我的购物车</h2></div>
+
+            {include file="header/header"}
+
+        </div>
+    </div>
+    <div class="page-main">
+        {if (empty($usercar))}
+        <!-- 购物车为空的时候 -->
+        <div class="container">
+            <div class="cart-loading loading hide" id="J_cartLoading">
+                <div class="loader"></div>
+            </div>
+            <div class="cart-empty" id="J_cartEmpty">
+                <h2>您的购物车还是空的！</h2>
+                <p class="login-desc">登录后将显示您之前加入的商品</p>
+                <a href="#" class="btn btn-primary btn-login" id="J_loginBtn" data-stat-id="7874490dbcbc1e60" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-7874490dbcbc1e60', '#', 'pcpid']);">立即登录</a>
+                <a href="__SITE__/index/Index/service" class="btn btn-primary btn-shoping J_goShoping">马上去购物</a>
+            </div>
+        </div>
+        <!-- 购物车不为空的时候 -->
+        {else /}
+        <div class="container">
+            <div id="J_cartBox" class="">
+                <div class="cart-goods-list">
+                    <div class="list-head clearfix">
+                        <div class="col col-check">
+                            <i style="margin-left: 24px;"></i>
+                        </div>
+                        <div class="col col-img">&nbsp;</div>
+                        <div class="col col-name">商品名称</div>
+                        <div class="col col-price">单价</div>
+                        <div class="col col-num">数量</div>
+                        <div class="col col-total">小计</div>
+                        <div class="col col-action">操作</div>
+                    </div>
+                    {foreach $car as $value}
+                    <div class="list-body" id="J_cartListBody_{$value.car_id}">
+                        <div class="item-box">
+                            <div class="item-table J_cartGoods" data-info="{ commodity_id:'1163700032', gettype:'buy', itemid:'2163700022_0_buy', num:'1'} ">
+                                <div class="item-row clearfix">
+                                    <div class="col col-check" id="check">
+                                        <i id="J_itemCheckbox_{$value.car_id}" class="iconfont icon-checkbox  J_itemCheckbox" car_id="{$value.car_id}">√</i>
+                                        <!-- <i class="iconfont icon-checkbox icon-checkbox-selected J_itemCheckbox" data-itemid="2162700015_0_buy" data-status="1">√</i> -->
+                                    </div>
+                                    <div class="col col-img">
+                                        <a href="javascript:;" target="_blank"> <img alt="" src="{$value.car_pic}" width="80" height="80"> </a>
+                                    </div>
+                                    <div class="col col-name">
+                                        <div class="tags"> </div>
+                                        <h3 class="name">  <a href="javascript:;" target="_blank"> {$value.gname} {$value.vname} {$value.cname}</a>  </h3> </div>
+                                    <div class="col col-price"> {$value.unit_price}元 </div>
+                                    <div class="col col-num">
+                                        <div class="change-goods-num clearfix J_changeGoodsNum">
+                                            <a href="javascript:;" class="minus" onclick="minus({$value.car_id}, {$value.unit_price});"><i class="iconfont"></i></a>
+                                            <input id="goodsNum_{$value.car_id}" tyep="text" name="2163700022_0_buy" value="{$value.goods_num}" data-num="1" data-buylimit="5" autocomplete="off" class="goods-num J_goodsNum">
+                                            <a href="javascript:;" class="plus" onclick="plus({$value.car_id}, {$value.unit_price});"><i class="iconfont"></i></a>
+                                        </div>
+                                    </div>
+                                    <div class="col col-total" id="goodsPrice_{$value.car_id}"> {$value.total_price}元
+                                    </div>
+                                    <div class="col col-action"> <a id="delGodos_{$value.car_id}" data-msg="确定删除吗？" href="javascript:void(0);" title="删除" class="del J_delGoods" onclick="delGods({$value.car_id});"><i class="iconfont"></i></a> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {/foreach}
+                    <!-- <div class="item-box">
+                            <div class="item-table J_cartGoods" data-info="{ commodity_id:'1163700032', gettype:'buy', itemid:'2163700022_0_buy', num:'1'} ">
+                                <div class="item-row clearfix">
+                                    <div class="col col-check"> <i class="iconfont icon-checkbox icon-checkbox-selected J_itemCheckbox" data-itemid="2163700022_0_buy" data-status="1">√</i> </div>
+                                    <div class="col col-img">
+                                        <a href="//item.mi.com/1163700032.html" target="_blank"> <img alt="" src="//i1.mifile.cn/a1/pms_1474956560.17197392!80x80.jpg" width="80" height="80"> </a>
+                                    </div>
+                                    <div class="col col-name">
+                                        <div class="tags"> </div>
+                                        <h3 class="name">  <a href="//item.mi.com/1163700032.html" target="_blank"> 小米手机5s Plus 全网通版 4GB内存 灰色 64GB </a>  </h3> </div>
+                                    <div class="col col-price"> 2299元 </div>
+                                    <div class="col col-num">
+                                        <div class="change-goods-num clearfix J_changeGoodsNum"> <a href="javascript:void(0)" class="J_minus"><i class="iconfont"></i></a>
+                                            <input tyep="text" name="2163700022_0_buy" value="1" data-num="1" data-buylimit="5" autocomplete="off" class="goods-num J_goodsNum"> <a href="javascript:void(0)" class="J_plus"><i class="iconfont"></i></a> </div>
+                                    </div>
+                                    <div class="col col-total"> 2299元
+                                        <p class="pre-info"> </p>
+                                    </div>
+                                    <div class="col col-action"> <a id="2163700022_0_buy" data-msg="确定删除吗？" href="javascript:void(0);" title="删除" class="del J_delGoods"><i class="iconfont"></i></a> </div>
+                                </div>
+                            </div>
+                        </div> -->
+                    <div class="cart-bar clearfix" id="J_cartBar">
+                        <div class="section-left">
+                            <a href="//list.mi.com/0" class="back-shopping J_goShoping" data-stat-id="3d1e5bdd191768c8" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-3d1e5bdd191768c8', '#', 'pcpid']);">继续购物</a>
+                            <span class="cart-total">共 <i id="J_cartTotalNum">{$goodsNum}</i> 件商品，已选择 <i id="J_selTotalNum">0</i> 件</span>
+                        </div>
+                        <span class="total-price">
+                            合计（不含运费）：<em id="J_cartTotalPrice">0</em>元
+                        </span>
+                        <a href="javascript:void(0);" class="btn btn-a btn btn-primary" id="J_goCheckout" onclick="account();">立即购买</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {/if}
+        <div class="site-footer">
+            <div class="container">
+                <div class="footer-service">
+                    <ul class="list-service clearfix">
+                        <li><a rel="nofollow" href="//www.mi.com/static/fast/" target="_blank" data-stat-id="46873828b7b782f4" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-46873828b7b782f4', '//www.mi.com/static/fast/', 'pcpid']);"><i class="iconfont"></i>预约维修服务</a></li>
+                        <li><a rel="nofollow" href="//www.mi.com/service/exchange#back" target="_blank" data-stat-id="78babcae8a619e26" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-78babcae8a619e26', '//www.mi.com/service/exchange#back', 'pcpid']);"><i class="iconfont"></i>7天无理由退货</a></li>
+                        <li><a rel="nofollow" href="//www.mi.com/service/exchange#free" target="_blank" data-stat-id="d1745f68f8d2dad7" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-d1745f68f8d2dad7', '//www.mi.com/service/exchange#free', 'pcpid']);"><i class="iconfont"></i>15天免费换货</a></li>
+                        <li><a rel="nofollow" href="//www.mi.com/service/exchange#mail" target="_blank" data-stat-id="f1b5c2451cf73123" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-f1b5c2451cf73123', '//www.mi.com/service/exchange#mail', 'pcpid']);"><i class="iconfont"></i>满150元包邮</a></li>
+                        <li><a rel="nofollow" href="//www.mi.com/static/maintainlocation/" target="_blank" data-stat-id="b57397dd7ad77a31" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-b57397dd7ad77a31', '//www.mi.com/static/maintainlocation/', 'pcpid']);"><i class="iconfont"></i>520余家售后网点</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links clearfix">
+                    <dl class="col-links col-links-first">
+                        <dt>帮助中心</dt>
+                        <dd><a rel="nofollow" href="//www.mi.com/service/account/register/" target="_blank" data-stat-id="e5dad0738a41014f" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-e5dad0738a41014f', '//www.mi.com/service/account/register/', 'pcpid']);">账户管理</a></dd>
+                        <dd><a rel="nofollow" href="//www.mi.com/service/buy/buytime/" target="_blank" data-stat-id="8e128f473e680197" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-8e128f473e680197', '//www.mi.com/service/buy/buytime/', 'pcpid']);">购物指南</a></dd>
+                        <dd><a rel="nofollow" href="//www.mi.com/service/order/sendprogress/" target="_blank" data-stat-id="fd9e3532f60a2f8d" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-fd9e3532f60a2f8d', '//www.mi.com/service/order/sendprogress/', 'pcpid']);">订单操作</a></dd>
+                    </dl>
+                    <dl class="col-links ">
+                        <dt>服务支持</dt>
+                        <dd><a rel="nofollow" href="//www.mi.com/service/exchange" target="_blank" data-stat-id="8e282b6f669ba990" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-8e282b6f669ba990', '//www.mi.com/service/exchange', 'pcpid']);">售后政策</a></dd>
+                        <dd><a rel="nofollow" href="http://fuwu.mi.com/" target="_blank" data-stat-id="5f2408ab3c808aa2" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-5f2408ab3c808aa2', 'http://fuwu.mi.com/', 'pcpid']);">自助服务</a></dd>
+                        <dd><a rel="nofollow" href="http://xiazai.mi.com/" target="_blank" data-stat-id="18c340c920a278a1" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-18c340c920a278a1', 'http://xiazai.mi.com/', 'pcpid']);">相关下载</a></dd>
+                    </dl>
+                    <dl class="col-links ">
+                        <dt>线下门店</dt>
+                        <dd><a rel="nofollow" href="//www.mi.com/c/xiaomizhijia/" target="_blank" data-stat-id="b27b566974e4aa67" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-b27b566974e4aa67', '//www.mi.com/c/xiaomizhijia/', 'pcpid']);">小米之家</a></dd>
+                        <dd><a rel="nofollow" href="//www.mi.com/static/maintainlocation/" target="_blank" data-stat-id="6dab396f7a873f15" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-6dab396f7a873f15', '//www.mi.com/static/maintainlocation/', 'pcpid']);">服务网点</a></dd>
+                        <dd><a rel="nofollow" href="//www.mi.com/static/familyLocation/" target="_blank" data-stat-id="9af5efe014c3aea2" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-9af5efe014c3aea2', '//www.mi.com/static/familyLocation/', 'pcpid']);">零售网点</a></dd>
+                    </dl>
+                    <dl class="col-links ">
+                        <dt>关于小米</dt>
+                        <dd><a rel="nofollow" href="//www.mi.com/about" target="_blank" data-stat-id="f6d386c65b1f4132" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-f6d386c65b1f4132', '//www.mi.com/about', 'pcpid']);">了解小米</a></dd>
+                        <dd><a rel="nofollow" href="http://hr.xiaomi.com/" target="_blank" data-stat-id="4307a445f5592adb" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-4307a445f5592adb', 'http://hr.xiaomi.com/', 'pcpid']);">加入小米</a></dd>
+                        <dd><a rel="nofollow" href="//www.mi.com/about/contact" target="_blank" data-stat-id="6842e821365ee45d" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-6842e821365ee45d', '//www.mi.com/about/contact', 'pcpid']);">联系我们</a></dd>
+                    </dl>
+                    <dl class="col-links ">
+                        <dt>关注我们</dt>
+                        <dd><a rel="nofollow" href="http://weibo.com/xiaomishangcheng" target="_blank" data-stat-id="4d561ee685cd2e15" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-4d561ee685cd2e15', 'http://weibo.com/xiaomishangcheng', 'pcpid']);">新浪微博</a></dd>
+                        <dd><a rel="nofollow" href="http://xiaoqu.qq.com/mobile/share/index.html?url=http%3A%2F%2Fxiaoqu.qq.com%2Fmobile%2Fbarindex.html%3Fwebview%3D1%26type%3D%26source%3Dindex%26_lv%3D25741%26sid%3D%26_wv%3D5123%26_bid%3D128%26%23bid%3D10525%26from%3Dwechat" target="_blank" data-stat-id="78fdefa9dee561b5" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-78fdefa9dee561b5', 'http://xiaoqu.qq.com/mobile/share/index.html?url=http%3A%2F%2Fxiaoqu.qq.com%2Fmobile%2Fbarindex.html%3Fwebview%3D1%26type%3D%26source%3Dindex%26_lv%3D25741%26sid%3D%26_wv%3D5123%26_bid%3D128%26%23bid%3D10525%26from%3Dwechat', 'pcpid']);">小米部落</a></dd>
+                        <dd><a rel="nofollow" href="#J_modalWeixin" data-toggle="modal" data-stat-id="47539f6570f0da90" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-47539f6570f0da90', '#J_modalWeixin', 'pcpid']);">官方微信</a></dd>
+                    </dl>
+                    <dl class="col-links ">
+                        <dt>特色服务</dt>
+                        <dd><a rel="nofollow" href="//order.mi.com/queue/f2code" target="_blank" data-stat-id="fdc16dd51892a164" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-fdc16dd51892a164', '//order.mi.com/queue/f2code', 'pcpid']);">F 码通道</a></dd>
+                        <dd><a rel="nofollow" href="//www.mi.com/mimobile/" target="_blank" data-stat-id="99876c8aaf8ef0a4" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-99876c8aaf8ef0a4', '//www.mi.com/mimobile/', 'pcpid']);">小米移动</a></dd>
+                        <dd><a rel="nofollow" href="//order.mi.com/misc/checkitem" target="_blank" data-stat-id="b08be6bd51351e1a" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-b08be6bd51351e1a', '//order.mi.com/misc/checkitem', 'pcpid']);">防伪查询</a></dd>
+                    </dl>
+                    <div class="col-contact">
+                        <p class="phone">400-100-5678</p>
+                        <p><span class="J_serviceTime-normal" style="
+">周一至周日 8:00-18:00</span>
+                            <span class="J_serviceTime-holiday" style="display:none;">2月7日至13日服务时间 9:00-18:00</span>
+                            <br>（仅收市话费）</p>
+                        <a rel="nofollow" class="btn btn-line-primary btn-small" href="//www.mi.com/service/contact" target="_blank" data-stat-id="a7642f0a3475d686" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-a7642f0a3475d686', '//www.mi.com/service/contact', 'pcpid']);"><i class="iconfont"></i> 24小时在线客服</a> </div>
+                </div>
+            </div>
+        </div>
+        <div class="site-info">
+            <div class="container">
+                <div class="logo ir">小米官网</div>
+                <div class="info-text">
+                    <p class="sites"><a rel="nofollow" href="//www.mi.com/index.html" target="_blank" data-stat-id="b9017a4e9e9eefe3" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-b9017a4e9e9eefe3', '//www.mi.com/index.html', 'pcpid']);">小米商城</a><span class="sep">|</span><a rel="nofollow" href="http://www.miui.com/" target="_blank" data-stat-id="ed2a0e25c8b0ca2f" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-ed2a0e25c8b0ca2f', 'http://www.miui.com/', 'pcpid']);">MIUI</a><span class="sep">|</span><a rel="nofollow" href="http://www.miliao.com/" target="_blank" data-stat-id="826b32c1478a98d5" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-826b32c1478a98d5', 'http://www.miliao.com/', 'pcpid']);">米聊</a><span class="sep">|</span><a rel="nofollow" href="http://www.duokan.com/" target="_blank" data-stat-id="c9d2af1ad828a834" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-c9d2af1ad828a834', 'http://www.duokan.com/', 'pcpid']);">多看书城</a><span class="sep">|</span><a rel="nofollow" href="http://www.miwifi.com/" target="_blank" data-stat-id="96f1a8cecc909af2" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-96f1a8cecc909af2', 'http://www.miwifi.com/', 'pcpid']);">小米路由器</a><span class="sep">|</span><a rel="nofollow" href="http://call.mi.com/" target="_blank" data-stat-id="347f6dd0d8d9fda3" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-347f6dd0d8d9fda3', 'http://call.mi.com/', 'pcpid']);">视频电话</a><span class="sep">|</span><a rel="nofollow" href="http://blog.xiaomi.com/" target="_blank" data-stat-id="4ad42379062eda19" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-4ad42379062eda19', 'http://blog.xiaomi.com/', 'pcpid']);">小米后院</a><span class="sep">|</span><a rel="nofollow" href="http://xiaomi.tmall.com/" target="_blank" data-stat-id="dfe0fac59cfb15d9" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-dfe0fac59cfb15d9', 'http://xiaomi.tmall.com/', 'pcpid']);">小米天猫店</a><span class="sep">|</span><a rel="nofollow" href="http://shop115048570.taobao.com" target="_blank" data-stat-id="c2613d0d3b77ddff" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-c2613d0d3b77ddff', 'http://shop115048570.taobao.com', 'pcpid']);">小米淘宝直营店</a><span class="sep">|</span><a rel="nofollow" href="http://union.mi.com/" target="_blank" data-stat-id="2f48f953961c637d" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-2f48f953961c637d', 'http://union.mi.com/', 'pcpid']);">小米网盟</a><span class="sep">|</span><a rel="nofollow" href="//static.mi.com/feedback/" target="_blank" data-stat-id="6479cd2d041bcf04" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-6479cd2d041bcf04', '//static.mi.com/feedback/', 'pcpid']);">问题反馈</a><span class="sep">|</span><a rel="nofollow" href="#J_modal-globalSites" data-toggle="modal" data-stat-id="9db137a8e0d5b3dd" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-9db137a8e0d5b3dd', '#J_modal-globalSites', 'pcpid']);">Select Region</a> </p>
+                    <p>©<a href="//www.mi.com/" target="_blank" title="mi.com" data-stat-id="836cacd9ca5b75dd" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-836cacd9ca5b75dd', '//www.mi.com/', 'pcpid']);">mi.com</a> 京ICP证110507号 <a href="http://www.miitbeian.gov.cn/" target="_blank" rel="nofollow" data-stat-id="f96685804376361a" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-f96685804376361a', 'http://www.miitbeian.gov.cn/', 'pcpid']);">京ICP备10046444号</a> <a rel="nofollow" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010802020134" target="_blank" data-stat-id="57efc92272d4336b" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-57efc92272d4336b', 'http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010802020134', 'pcpid']);">京公网安备11010802020134号 </a><a rel="nofollow" href="//c1.mifile.cn/f/i/2013/cn/jingwangwen.jpg" target="_blank" data-stat-id="c5f81675b79eb130" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-c5f81675b79eb130', '//c1.mifile.cn/f/i/2013/cn/jingwangwen.jpg', 'pcpid']);">京网文[2014]0059-0009号</a>
+                        <br> 违法和不良信息举报电话：185-0130-1238，本网站所列数据，除特殊说明，所有数据均出自我司实验室测试</p>
+                </div>
+                <div class="info-links">
+                    <a rel="nofollow" href="//privacy.truste.com/privacy-seal/validation?rid=4fc28a8c-6822-4980-9c4b-9fdc69b94eb8&amp;lang=zh-cn" target="_blank" data-stat-id="de920be99941f792" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-de920be99941f792', '//privacy.truste.com/privacy-seal/validation?rid=4fc28a8c-6822-4980-9c4b-9fdc69b94eb8&amp;lang=zh-cn', 'pcpid']);"><img rel="nofollow" src="//privacy-policy.truste.com/privacy-seal/seal?rid=4fc28a8c-6822-4980-9c4b-9fdc69b94eb8" alt="TRUSTe Privacy Certification"></a>
+                    <a rel="nofollow" href="//search.szfw.org/cert/l/CX20120926001783002010" target="_blank" data-stat-id="d44905018f8d7096" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-d44905018f8d7096', '//search.szfw.org/cert/l/CX20120926001783002010', 'pcpid']);"><img rel="nofollow" src="//s01.mifile.cn/i/v-logo-2.png" alt="诚信网站"></a>
+                    <a rel="nofollow" href="https://ss.knet.cn/verifyseal.dll?sn=e12033011010015771301369&amp;ct=df&amp;pa=461082" target="_blank" data-stat-id="3e1533699f264eac" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-3e1533699f264eac', 'https://ss.knet.cn/verifyseal.dll?sn=e12033011010015771301369&amp;ct=df&amp;pa=461082', 'pcpid']);"><img rel="nofollow" src="//s01.mifile.cn/i/v-logo-1.png" alt="可信网站"></a>
+                    <a rel="nofollow" href="http://www.315online.com.cn/member/315140007.html" target="_blank" data-stat-id="b085e50c7ec83104" onclick="_msq.push(['trackEvent', '08fae3d5cb3abaaf-b085e50c7ec83104', 'http://www.315online.com.cn/member/315140007.html', 'pcpid']);"><img rel="nofollow" src="//s01.mifile.cn/i/v-logo-3.png" alt="网上交易保障中心"></a>
+                </div>
+            </div>
+            <div class="slogan ir">探索黑科技，小米为发烧而生</div>
+        </div>
+</body>
+
+</html>

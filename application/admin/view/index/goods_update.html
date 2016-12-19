@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>修改商品</title>
+    <script type="text/javascript" src="__ADMIN__STATIC__/js/jquery-1.9.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="public__ADMIN__STATIC__/css/goods.css" />
+    <style>
+    .div1 {
+        margin-left: 250px;
+        margin-top: 50px;
+        font-size: 30px;
+    }
+    
+    .input1 {
+        width: 300px;
+        height: 30px;
+        font-size: 16px;
+    }
+    
+    .input2 {
+        width: 300px;
+        height: 30px;
+        font-size: 16px;
+    }
+    
+    .input3 {
+        width: 300px;
+        height: 30px;
+        font-size: 16px;
+    }
+    
+    #btn {
+        margin-left: 160px;
+        width: 100px;
+        height: 50px;
+        font-weight: bold;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="div1">
+        <form action="/admin/index/goodsUpdate" enctype="multipart/form-data" method="post">
+            产品名称：
+            <input id="intro" class="input1" type="text" name="introduction" value="{$result['introduction']}">
+            <br>
+            <input style="margin-left:155px;" type="file" name="image" />
+            <br>
+            <input type="hidden" name=version_id value="{$result['version_id']}"> 原&nbsp;&nbsp;价&nbsp;&nbsp;格：
+            <input type="text" id="original" class="input2" name="original_price" value="{$result['original_price']}">
+            <br> 现&nbsp;&nbsp;价&nbsp;&nbsp;格：
+            <input type="text" id="version" class="input3" name="version_price" value="{$result['version_price']}">
+            <br>
+            <button id="btn" value="提交">确 认 提 交</button>
+        </form>
+    </div>
+</body>
+
+</html>

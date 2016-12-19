@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0,user-scalable=no">
+    <meta name="format-detection" content="telephone=no" />
+    <title>小米帐号 - 个人信息</title>
+    <link type="text/css" rel="stylesheet" href="https://account.xiaomi.com/static/res/23f48a9/account-static/respassport/acc-2014/css/reset.css">
+    <link type="text/css" rel="stylesheet" href="https://account.xiaomi.com/static/res/f4423b5/account-static/respassport/acc-2014/css/layout.css">
+    <link type="text/css" rel="stylesheet" href="https://account.xiaomi.com/static/res/969993b/account-static/respassport/HtmlResource/cssSass/css/modacctip.css">
+    <style type="text/css">
+    /*启用修改头像功能*/
+    
+    .na-img-area:hover .na-edit {
+        display: block;
+        cursor: pointer;
+    }
+    
+    .na-img-area {
+        cursor: default
+    }
+    /*popup的遮层*/
+    
+    .popup_mask {
+        position: fixed;
+        z-index: 99;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        display: none;
+        _position: absolute;
+        _height: 1000px;
+    }
+    
+    .popup_mask .mod_wrap {
+        height: 100%;
+        overflow-y: auto;
+        position: absolute;
+        width: 100%;
+        z-index: 1;
+    }
+    
+    .popup_mask .bkc {
+        position: absolute;
+        width: 100%;
+        height: 200%;
+        left: 0;
+        top: 0;
+        background-color: #333;
+        filter: alpha(opacity=70);
+        opacity: 0.7;
+    }
+    
+    .popup_mask .mod_acc_tip {
+        display: none;
+        position: absolute;
+        left: 50%;
+        margin-left: -206px;
+        top: 50%;
+        margin-top: -187px;
+        _top: 500px;
+    }
+    /*剪切图片的水平、垂直居中及模糊*/
+    
+    .clipimg {
+        text-align: left;
+        position: relative;
+    }
+    
+    .clipimg img {
+        max-width: 300px;
+        max-height: 300px;
+        /*
+  filter: alpha(opacity=70);
+  opacity: .7;
+  */
+        position: absolute;
+    }
+    /*clip部分*/
+    
+    .clipimg .movebox {
+        /*
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  */
+        border: 1px solid #00aeff;
+    }
+    
+    .uploadimgs {
+        filter: none;
+        opacity: 1;
+    }
+    
+    .clipimg .movebox {
+        width: 98px;
+        height: 98px;
+        z-index: 1000;
+        background-image: url(#);
+    }
+    /*上传*/
+    
+    #photoUploader .uplodefile {
+        font-size: 45px;
+        *vertical-align: bottom;
+    }
+    
+    ::-webkit-file-upload-button {
+        cursor: pointer;
+    }
+    /*干掉该死的IE6的遮罩问题*/
+    
+    #loadingMask .bkc {
+        _height: 2000px;
+    }
+    /*wap*/
+    
+    .bugfix_ie6 {
+        display: block;
+    }
+    </style>
+    <script src="__STATIC__/assets/js/jquery-1.8.2.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#editInfo").click(function(event) {
+                $username = $("#username").val();
+                $userbirthday = $("#userbirthday").val();
+                if ($("#usersex").val() == '男') {
+                    $usersex = 0;
+                } else if ($("#usersex").val() == '女'){
+                    $usersex = 1;
+                } else if ($("#usersex").val() == ''){
+                    return $("#usersex").attr({
+                        value: '请填写性别 男or女'
+                    });
+                } else {
+                    return $("#usersex").attr({
+                        value: '请正确输入性别 男or女'
+                    });
+                }
+                $userphone = $("#userphone").val();
+                $useremail = $("#useremail").val();
+                $address = $("#address").val();
+
+                $.post("{:url('index/Index/changeInfo')}", {username: $username, userbirthday: $userbirthday, usersex: $usersex, userphone: $userphone, useremail: $useremail, address: $address}, function(data) {
+                    if (data.status) {
+                        alert(data.msg);
+                        location.href = 'home';
+                    } else {
+                        alert(data.msg);
+                    }
+                }, 'json');
+
+            });
+            $("#usersex").focus(function(event) {
+                $("#usersex").attr({
+                    value: ''
+                });
+            });
+        });
+    </script>
+</head>
+
+<body class="zh_CN">
+    <div class="wrapper blockimportant">
+        <div class="wrap">
+            <div class="layout bugfix_ie6 dis_none">
+                <div class="n-logo-area clearfix">
+                    <a href="portal" class="fl-l">
+                        <img src="__STATIC__/assets/img/userinfo.jpg" />
+                    </a>
+                    <a id="logoutLink" class="fl-r logout" href="__SITE__/index/Index/loginout">
+          退出
+      </a>
+                </div>
+                <!--头像 名字-->
+                <div class="n-account-area-box">
+                    <div class="n-account-area clearfix">
+                        <div class="na-info">
+                            <p class="na-name">{$session.username}</p>
+                        </div>
+                        <div class="na-img-area fl-l">
+                            {if (empty($session.headPortrait))}
+                            <div class="na-img-bg-area"></div>
+                            {else /}
+                            <div class="na-img-bg-area"><img src="__SITE__{$session.headPortrait}"></div>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layout">
+                <div class="n-main-nav clearfix">
+                    <ul>
+                        <li>
+                            <a href="__SITE__/index/Index/userInfo" title="帐号安全">帐号安全</a>
+                            <em class="n-nav-corner"></em>
+                        </li>
+                        <li class="current">
+                            <a title="个人信息">个人信息</a>
+                            <em class="n-nav-corner"></em>
+                        </li>
+                    </ul>
+                </div>
+                <div class="n-frame">
+                    <div class="uinfo c_b">
+                        <div class="">
+                            <div class="main_l">
+                                <div class="naInfoImgBox t_c">
+                                    <div class="na-img-area marauto">
+                                        {if (empty($session.headPortrait))}
+                                        <div class="na-img-bg-area"></div>
+                                        {else /}
+                                        <div class="na-img-bg-area"><img src="__SITE__{$session.headPortrait}"></div>
+                                        {/if}
+                                        <em class="na-edit"></em>
+                                    </div>
+                                    <div class="naImgLink">
+                                        <form action="/index/index/upload" enctype="multipart/form-data" method="post">
+                                            <input id="upload" type="file" name="image" style="margin-left: 60px;" />
+                                            <br>
+                                            <br>
+                                            <input type="submit" value="设置头像" class="color4a9" id="setHead" />
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="main_r">
+                                <div class="framedatabox">
+                                    <div class="fdata">
+                                        <a class="color4a9 fr" href="javascript:;" title="编辑" id="editInfo"><i class="iconpencil"></i>保存</a>
+                                        <h3>基础资料</h3>
+                                    </div>
+                                    <div class="fdata lblnickname">
+                                        <p><span>姓名：</span>
+                                            <input type="text" id="username" value="{$session.username}">
+                                        </p>
+                                    </div>
+                                    <div class="fdata lblbirthday">
+                                        <p><span>生日：</span>
+                                            <input type="text" id="userbirthday" value="{$session.userBirthday}">
+                                        </p>
+                                    </div>
+                                    <div class="fdata lblgender">
+                                        <p><span>性别：</span>
+                                            {if ($session.userSex) == 0}
+                                                <input type="text" id="usersex" value="男">
+                                            {elseif (($session.userSex) == 1)}
+                                                <input type="text" id="usersex" value="女">
+                                            {else /}
+                                                <input type="text" id="usersex" value="{$session.userSex}">
+                                            {/if}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="framedatabox">
+                                    <div class="fdata">
+                                        <h3>高级设置</h3>
+                                    </div>
+                                    <div class="fdata click-row">
+                                        <p>
+                                            <span>手机号：{$session.userPhone}</span>
+                                        </p>
+                                    </div>
+                                    <div class="fdata click-row">
+                                        <p>
+                                            <span>邮箱：</span>
+                                            <input type="text" id="useremail" value="{$session.userEmail}">
+                                        </p>
+                                    </div>
+                                    <div class="fdata click-row">
+                                        <p>
+                                            <span>收货地址：</span>
+                                            <input type="text" id="address" value="{$session.address}">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

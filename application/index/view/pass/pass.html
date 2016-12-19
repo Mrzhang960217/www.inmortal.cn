@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <title>小米帐号 - 找回密码</title>
+		<meta name="keywords" content="" />
+		<meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="__STATIC__/assets/css/reset.css">
+        <link rel="stylesheet" href="__STATIC__/assets/css/supersized.css">
+        <link rel="stylesheet" href="__STATIC__/assets/css/style.css">
+
+        <!-- Javascript -->
+        <script src="__STATIC__/assets/js/jquery-1.11.3.js"></script>
+        <script src="__STATIC__/assets/js/supersized.3.2.7.min.js"></script>
+        <script src="__STATIC__/assets/js/supersized-init.js"></script>
+        <script src="__STATIC__/assets/js/scripts.js"></script>
+
+        <script type="text/javascript">
+            $(function() {
+
+                // 验证码刷新函数
+                function refreshVerify()
+                {
+                    var ts = Date.parse(new Date())/1000;
+                    $("#verify").attr("src", "/captcha?id="+ts);
+                }
+
+                $("#verify").click(function () {
+                    refreshVerify();
+                });
+
+                $(".username").blur(function(event) {
+                    if ($(".username").val() == '') {
+                        $(this).attr({placeholder:'手机号码不能为空'});
+                        return false;
+                    } else {
+                        $.post("{:url('index/Index/checkuser')}", {username: $(".username").val()}, function(data) {
+                            if (!data.status) {
+                                $(".username").next().html("<font color='red'>"+data.msg+"</font>");
+                            }
+                        }, 'json');
+                    }
+                });
+                $(".username").focus(function(event) {
+                    $(".username").next().html('');
+                    $(this).attr({placeholder:'请输入手机号码'});
+                });
+                $(".email").blur(function(event) {
+                    if ($(".email").val() == '') {
+                        $(this).attr({placeholder:'邮箱不能为空'});
+                    }
+                });
+                $(".email").focus(function(event) {
+                    $(this).attr({placeholder:'请输入邮箱'});
+                });
+                $(".verify").blur(function(event) {
+                    if ($(".verify").val() == '') {
+                        $(this).attr({placeholder:'验证码不能为空'});
+                    }
+                });
+                $(".verify").focus(function(event) {
+                    $(this).next().html('');
+                    $(this).attr({placeholder:'请输入验证码'});
+                });
+
+                $(".submit").click(function(event) {
+                    $username = $(".username").val();
+                    $email = $(".email").val();
+                    $verify = $(".verify").val();
+
+                    if ($username == '' || $email == '' || $verify == '') {
+                        return false;
+                    }
+                  
+                    $.post("{:url('index/Index/doBack')}", {user_phone: $username, email: $email, verify: $verify}, function(data) {
+                        if (data.status) {
+                            $userphone = data.user_phone;
+                            $(".submit").html(data.msg);
+                            setTimeout(function () {
+                                $("h1").html('修改账号密码');
+                                $("#form").css('display', 'none');
+                                $("#backform").css('display', 'block');
+                                $("#user_phone").html(data.user_phone);
+                            }, 2000);
+                        } else {
+
+                        }
+                    }, 'json');
+                });
+
+                $(".password").blur(function(event) {
+                    if ($(".password").val() == '') {
+                        $(this).attr({placeholder:'密码不能为空'});
+                    }
+
+                        var reg = /\w{6}/;
+
+                        if (reg.test($(".password").val())) {
+                            $(".password").next().html('');
+                            return true;
+                        } else {
+                            $(".password").next().html('<font color="red">密码必须是6位的字符</font>');
+                            return false;
+                        }
+                });
+                $(".password").focus(function(event) {
+                    $(this).attr({placeholder:'请输入新密码'});
+                });
+
+                $(".back").click(function(event) {
+                    $password = $(".password").val();
+                    $repassword = $(".repassword").val();
+
+                    if ($password != $repassword) {
+                        $(".repassword").next().html('<font color="red">俩次密码不一样</font>');
+                        return false;
+                    }
+
+                    if ($password == '' || $repassword == '') {
+                        return false;
+                    }
+                    
+                    $.post("{:url('index/Pass/doModify')}", {password: $password, user_phone: $userphone}, function(data) {
+                        if (data.status) {
+                            $(".back").html('修改成功，三秒后自动跳转到登录页面');
+                            $("button").attr({"disabled": true});
+                            setTimeout(function () {
+                                location.href = '__SITE__/login';
+                            }, 3000);
+                        } else {
+                            alert('修改失败');
+                        }
+                    }, 'json');
+                });
+            });
+
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="page-container">
+            <h1>找回小米账号</h1>
+            <!-- <form > -->
+            <form id="form" action="" onsubmit="return false;">
+                <input type="text" name="username" class="username" placeholder="请输入手机号码">
+                <span></span>
+                <input type="email" name="email" class="email" placeholder="请输入邮箱">
+                <input type="text" name="verify" class="verify" placeholder="请输入验证码">
+                <span></span>
+                <img id="verify" src="{:captcha_src()}" alt="captcha">
+                <button type="submit" class="submit">找回</button>
+                <div class="error"><span>+</span></div>
+            </form>
+
+            <form id="backform" action="" onsubmit="return false;" style="display: none;">
+                <br>
+                <span id="span" style="font-size: 20px; color: red;">您的小米账号为 ：</span>
+                <span id="user_phone"></span>
+                <input type="password" name="password" class="password" placeholder="请输入新密码">
+                <span></span>
+                <input type="password" name="repassword" class="repassword" placeholder="请再次输入密码">
+                <span></span>
+                <button type="submit" class="back">确认修改</button>
+                <div class="error"><span>+</span></div>
+            </form>
+        </div>
+
+    </body>
+
+</html>
+
+

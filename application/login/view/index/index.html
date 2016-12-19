@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <title>小米帐号 - 登录</title>
+		<meta name="keywords" content="" />
+		<meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="__STATIC__/assets/css/reset.css">
+        <link rel="stylesheet" href="__STATIC__/assets/css/supersized.css">
+        <link rel="stylesheet" href="__STATIC__/assets/css/style.css">
+
+        <!-- Javascript -->
+        <script src="__STATIC__/assets/js/jquery-1.8.2.min.js"></script>
+        <script src="__STATIC__/assets/js/supersized.3.2.7.min.js"></script>
+        <script src="__STATIC__/assets/js/supersized-init.js"></script>
+        <script src="__STATIC__/assets/js/scripts.js"></script>
+
+        <script type="text/javascript">
+            $(function () {
+                $(".username").blur(function(event) {
+                    if ($(".username").val() == '') {
+                        $(this).attr({placeholder:'账号不能为空'});
+                    }
+
+                    $.post("{:url('login/Index/checkUser')}", {username: $(".username").val()}, function(data) {
+
+                        if (!data.status) {
+                            $(".username").next().html("<font color='red'>"+data.msg+"</font>");
+                        }
+                    }, 'json');
+                });
+                $(".username").focus(function(event) {
+                    $(this).next().html('');
+                    $(this).attr({placeholder:'小米账号/手机号'});
+                });
+                $(".password").blur(function(event) {
+                    if ($(".password").val() == '') {
+                        $(this).attr({placeholder:'密码不能为空'});
+                    }
+                });
+                $(".password").focus(function(event) {
+                    $(this).next().html('');
+                    $(this).attr({placeholder:'账号密码'});
+                });
+
+                //AJAX提交请求
+                $(".submit").click(function(event) {
+                    $username = $(".username").val();
+                    $password = $(".password").val();
+                    if ($username == '' || $password == '') {
+                        return false;
+                    }
+
+                    $.post("{:url('login/Index/doLogin')}", {username: $username, password: $password}, function(data) {
+
+                        if (!data.status) {
+                            $(data.classname).next().html("<font color='red'>"+data.msg+"</font>");
+                        } else {
+                            location.href = '__SITE__';
+                        }
+                    }, 'json');
+                });
+            });
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="page-container">
+            <h1>登录小米帐号</h1>
+            <form action="" onsubmit="return false;">
+                <input type="text" name="username" class="username" placeholder="小米账号/手机号">
+                <span></span>
+                <input type="password" name="password" class="password" placeholder="账号密码">
+                <span></span>
+                <button type="submit" class="submit">立即登录</button>
+                <div class="error"><span>+</span></div>
+            </form>
+        </div>
+        <div class="connect">
+              <a class="outer-link" href="__SITE__/register">注册小米帐号</a><span>|</span>
+              <a class="outer-link" href="__SITE__/index/Index/dopass">忘记密码？</a>
+    	</div>
+
+    </body>
+
+</html>

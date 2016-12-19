@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <title>小米帐号 - 找回密码</title>
+		<meta name="keywords" content="" />
+		<meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="__STATIC__/assets/css/reset.css">
+        <link rel="stylesheet" href="__STATIC__/assets/css/supersized.css">
+        <link rel="stylesheet" href="__STATIC__/assets/css/style.css">
+
+        <!-- Javascript -->
+        <script src="__STATIC__/assets/js/jquery-1.11.3.js"></script>
+        <script src="__STATIC__/assets/js/supersized.3.2.7.min.js"></script>
+        <script src="__STATIC__/assets/js/supersized-init.js"></script>
+        <script src="__STATIC__/assets/js/scripts.js"></script>
+        <script type="text/javascript">
+            $(function () {
+                $(".back").click(function(event) {
+                    $email = $(".email").val();
+
+                    if ($email == '') {
+                        return false;
+                    }
+                    
+                    $.post("{:url('coned')}", {email: $email}, function(data) {
+                        if (data.status) {
+                            console.log(data.msg);
+                            $(".back").html(data.msg);
+                            $("button").attr({"disabled": true});
+                            setTimeout(function () {
+                                location.href = '__SITE__';
+                            }, 3000);
+                        } else {
+                            alert(data.msg);
+                        }
+                    }, 'json');
+                });
+            });
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="page-container">
+            <h1>找回小米账号</h1>
+
+            <form id="backform" action="" onsubmit="return false;">
+                <br>
+                <span id="span" style="font-size: 20px; color: red;">您要验证找回密码的邮箱为 ：</span>
+                <span id="user_phone"></span>
+                <input type="email" name="email" class="email" placeholder="请输入您的邮箱">
+                <button type="submit" class="back"> 确认发送 </button>
+                <div class="error"><span>+</span></div>
+            </form>
+        </div>
+
+    </body>
+
+</html>
+
+
